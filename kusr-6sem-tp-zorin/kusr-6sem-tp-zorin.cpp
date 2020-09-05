@@ -2,6 +2,8 @@
 
 using namespace sf;
 
+//GIT TEST
+
 int main()
 {
 	// Объект, который, собственно, является главным окном приложения
@@ -24,7 +26,7 @@ int main()
 
 			window.draw(c);
 		}
-		// Отрисовка окна	
+		// Отрисовка окна
 		window.display();
 	}
 
