@@ -9,11 +9,12 @@ RenderWindow window(VideoMode(640, 360), "Odd Even Game.");
 Clock clk;
 
 int** field;
-int size;
+const int n = 15;
 
 bool
-	written = false,
-	faded = false;
+written = false,
+faded = false,
+server = false;
 
 int startScreen()
 {
@@ -189,7 +190,70 @@ int startScreen()
 
 void gameScreen()
 {
+	Font font;
+	font.loadFromFile("SIMPLER.TTF");
 
+	Text num[n][n];
+	for (int i = 0; i < n; ++i)
+	{
+		for (int j = 0; j < n; ++j)
+		{
+			num[i][j].setFont(font);
+			num[i][j].setOutlineColor(Color(255, 255, 255));
+			num[i][j].setOutlineThickness(1);
+			if (rand() % 2)
+				num[i][j].setFillColor(Color(255, 0, 58));
+			else
+				num[i][j].setFillColor(Color(0, 123, 211));
+			num[i][j].move((0.1021 * n * n - 3.0154 * n + 36.6780) + (340 / n) * i,
+				(-0.0579 * n * n + 1.8743 * n - 4.9971) + (340 / n) * j);
+			if (rand() % 2)
+				num[i][j].setString('0');
+			else
+				num[i][j].setString('1');
+			num[i][j].setCharacterSize(340 / n - 5);
+		}
+	}
+
+	RectangleShape grid[n][n];
+
+	for (int i = 0; i < n; ++i)
+	{
+		for (int j = 0; j < n; ++j)
+		{
+			grid[i][j].setSize(Vector2f(340 / n, 340 / n));
+			grid[i][j].setOutlineColor(Color(255, 255, 255));
+			grid[i][j].setOutlineThickness(2);
+			grid[i][j].setFillColor(Color(0, 0, 0, 255));
+			grid[i][j].move(10 + (340 / n) * i, 10 + (340 / n) * j);
+		}
+	}
+
+	while (window.isOpen())
+	{
+		Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == Event::Closed)
+			{
+				window.close();
+				return;
+			}
+		}
+
+		window.clear(Color::Black);
+
+		for (int i = 0; i < n; ++i)
+		{
+			for (int j = 0; j < n; ++j)
+			{
+				window.draw(grid[i][j]);
+				window.draw(num[i][j]);
+			}
+		}
+
+		window.display();
+	}
 }
 
 void rulesScreen()
@@ -250,6 +314,7 @@ void rulesScreen()
 			if (event.type == Event::Closed)
 			{
 				window.close();
+				return;
 			}
 
 			if (IntRect(450, 300, 160, 40).contains(Mouse::getPosition(window)))
@@ -279,6 +344,11 @@ void rulesScreen()
 
 		window.display();
 	}
+}
+
+void scoreScreen()
+{
+
 }
 
 int main()
