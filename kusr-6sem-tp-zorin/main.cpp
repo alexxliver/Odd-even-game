@@ -9,7 +9,10 @@ RenderWindow window(VideoMode(640, 360), "Odd Even Game.");
 Clock clk;
 
 int** field;
-const int n = 18;
+int n;
+
+Text** num;
+RectangleShape** grid;
 
 bool
 written = false,
@@ -218,7 +221,7 @@ int choiceScreen(int c)
 	option[1].setString(L"• С компьютером");
 	option[0].move(50, 120);
 	option[1].move(300, 120);
-	header[1].setString(L"Начинает игру:");
+	header[1].setString(L"Выбор игрока:");
 	header[1].move(50, 30);
 	option[2].setString(L"• Нечётный");
 	option[3].setString(L"• Чётный");
@@ -267,23 +270,62 @@ int choiceScreen(int c)
 				return 1;
 			}
 
-			if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left)
+			switch (c)
 			{
-				switch (c)
+			case 0:
+				if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left)
 				{
-				case 0:
-					if (IntRect(50, 120, 150, 40).contains(Mouse::getPosition(window)))
-					{
-
-					}
-					break;
-				case 1:
-					break;
-				case 2:
-					break;
-				case 3:
-					break;
+					if (IntRect(50, 120, 160, 40).contains(Mouse::getPosition(window)))
+						server = false;
+					else if (IntRect(300, 120, 270, 40).contains(Mouse::getPosition(window)))
+						server = true;
+					return 0;
 				}
+				break;
+			case 1:
+				if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left)
+				{
+					if (IntRect(50, 120, 175, 40).contains(Mouse::getPosition(window)))
+						turn = false;
+					else if (IntRect(400, 120, 140, 40).contains(Mouse::getPosition(window)))
+						turn = true;
+					return 0;
+				}
+				break;
+			case 2:
+				for (int i = 4; i < 20; ++i)
+				{
+					if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left)
+					{
+						if (i < 10 && IntRect(50, 130 + 40 * (i - 5), 115, 40).contains(Mouse::getPosition(window)))
+						{
+							n = i - 1;
+							return 0;
+						} 
+						else if (i < 16 && i >= 10 &&
+							IntRect(225, 130 + 40 * (i - 11), 115, 40).contains(Mouse::getPosition(window)))
+						{
+							n = i - 1;
+							return 0;
+						}
+						else if (i < 20 && i >= 16 &&
+							IntRect(400, 130 + 40 * (i - 17), 115, 40).contains(Mouse::getPosition(window)))
+						{
+							n = i - 1;
+							return 0;
+						}
+					}
+				}
+				break;
+			case 3:
+				if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left)
+				{
+					if (IntRect(50, 120, 300, 40).contains(Mouse::getPosition(window)))
+						return 0;
+					else if (IntRect(400, 120, 130, 40).contains(Mouse::getPosition(window)))
+						return 1;
+				}
+				break;
 			}
 
 			switch (c)
@@ -311,6 +353,21 @@ int choiceScreen(int c)
 				}
 				break;
 			case 2:
+				for (int i = 4; i < 20; ++i)
+				{
+					if (i < 10 && IntRect(50, 130 + 40 * (i - 5), 115, 40).contains(Mouse::getPosition(window)))
+						option[i].setFillColor(Color(0, 123, 211));
+					else if (i < 16 && i >= 10 && 
+						IntRect(225, 130 + 40 * (i - 11), 115, 40).contains(Mouse::getPosition(window)))
+						option[i].setFillColor(Color(0, 123, 211));
+					else if (i < 20 && i >= 16 &&
+						IntRect(400, 130 + 40 * (i - 17), 115, 40).contains(Mouse::getPosition(window)))
+						option[i].setFillColor(Color(0, 123, 211));
+					else
+					{
+						option[i].setFillColor(Color(255, 0, 58));
+					}
+				}
 				break;
 			case 3:
 				if (IntRect(50, 120, 300, 40).contains(Mouse::getPosition(window)))
@@ -359,18 +416,23 @@ int choiceScreen(int c)
 void clear()
 {
 	for (int i = 0; i < n; ++i)
+	{
 		delete[] field[i];
+		delete[] num[i];
+		delete[] grid[i];
+	}	
 	delete[] field;
+	delete[] num;
+	delete[] grid;
 }
 
 void gameScreen()
 {
-	//choiceScreen(0);
-	//choiceScreen(1);
-	//choiceScreen(2);
-	//choiceScreen(3);
+	choiceScreen(0);
+	if(server)
+		choiceScreen(1);
+	choiceScreen(2);
 
-	turn = false;
 	number = false;
 
 	field = new int*[n];
@@ -383,7 +445,11 @@ void gameScreen()
 	Font font;
 	font.loadFromFile("SIMPLER.TTF");
 
-	Text num[n][n], cursor;
+	Text cursor;
+	num = new Text* [n];
+	for (int i = 0; i < n; ++i)
+		num[i] = new Text[n];
+
 	for (int i = 0; i < n; ++i)
 	{
 		for (int j = 0; j < n; ++j)
@@ -402,7 +468,9 @@ void gameScreen()
 	cursor.setString('0');
 	cursor.setCharacterSize(20);
 
-	RectangleShape grid[n][n];
+	grid = new RectangleShape* [n];
+	for (int i = 0; i < n; ++i)
+		grid[i] = new RectangleShape[n];
 
 	for (int i = 0; i < n; ++i)
 	{
