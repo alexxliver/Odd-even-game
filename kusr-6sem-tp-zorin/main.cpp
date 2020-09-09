@@ -9,12 +9,14 @@ RenderWindow window(VideoMode(640, 360), "Odd Even Game.");
 Clock clk;
 
 int** field;
-const int n = 15;
+const int n = 18;
 
 bool
 written = false,
 faded = false,
-server = false;
+server = false,
+turn = false,
+number = false;
 
 int startScreen()
 {
@@ -188,12 +190,200 @@ int startScreen()
 	}
 }
 
-void gameScreen()
+int choiceScreen(int c)
 {
 	Font font;
 	font.loadFromFile("SIMPLER.TTF");
 
-	Text num[n][n];
+	Text header[4], option[22];
+	for (int i = 0; i < 22; ++i)
+	{
+		if (i < 4)
+		{
+			header[i].setFillColor(Color(0, 123, 211));
+			header[i].setFont(font);
+			header[i].setCharacterSize(40);
+			header[i].setOutlineColor(Color(255, 255, 255));
+			header[i].setOutlineThickness(1);
+		}
+		option[i].setFillColor(Color(255, 0, 58));
+		option[i].setFont(font);
+		option[i].setCharacterSize(30);
+		option[i].setOutlineColor(Color(255, 255, 255));
+		option[i].setOutlineThickness(1);
+	}
+	header[0].setString(L"Режим игры:");
+	header[0].move(50, 30);
+	option[0].setString(L"• 2 игрока");
+	option[1].setString(L"• С компьютером");
+	option[0].move(50, 120);
+	option[1].move(300, 120);
+	header[1].setString(L"Начинает игру:");
+	header[1].move(50, 30);
+	option[2].setString(L"• Нечётный");
+	option[3].setString(L"• Чётный");
+	option[2].setFillColor(Color(0, 123, 211));
+	option[2].move(50, 120);
+	option[3].move(400, 120);
+	header[2].setString(L"Размер поля:");
+	header[2].move(50, 30);
+	option[4].setString(L"• 3х3");
+	option[5].setString(L"• 4х4");
+	option[6].setString(L"• 5х5");
+	option[7].setString(L"• 6х6");
+	option[8].setString(L"• 7х7");
+	option[9].setString(L"• 8х8");
+	for (int i = 4; i < 10; ++i)
+		option[i].move(50, 130 + 40 * (i - 5));
+	option[10].setString(L"• 9х9");
+	option[11].setString(L"• 10х10");
+	option[12].setString(L"• 11х11");
+	option[13].setString(L"• 12х12");
+	option[14].setString(L"• 13х13");
+	option[15].setString(L"• 14х14");
+	for (int i = 10; i < 16; ++i)
+		option[i].move(225, 130 + 40 * (i - 11));
+	option[16].setString(L"• 15х15");
+	option[17].setString(L"• 16х16");
+	option[18].setString(L"• 17х17");
+	option[19].setString(L"• 18х18");
+	for (int i = 16; i < 20; ++i)
+		option[i].move(400, 130 + 40 * (i - 17));
+	header[3].setString(L"Пауза");
+	header[3].move(50, 30);
+	option[20].setString(L"• Продолжить игру");
+	option[21].setString(L"• Выход");
+	option[20].move(50, 120);
+	option[21].move(400, 120);
+
+	while (window.isOpen())
+	{
+		Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == Event::Closed)
+			{
+				window.close();
+				return 1;
+			}
+
+			if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left)
+			{
+				switch (c)
+				{
+				case 0:
+					if (IntRect(50, 120, 150, 40).contains(Mouse::getPosition(window)))
+					{
+
+					}
+					break;
+				case 1:
+					break;
+				case 2:
+					break;
+				case 3:
+					break;
+				}
+			}
+
+			switch (c)
+			{
+			case 0:
+				if (IntRect(50, 120, 160, 40).contains(Mouse::getPosition(window)))
+					option[0].setFillColor(Color(0, 123, 211));
+				else if (IntRect(300, 120, 270, 40).contains(Mouse::getPosition(window)))
+					option[1].setFillColor(Color(0, 123, 211));
+				else
+				{
+					option[0].setFillColor(Color(255, 0, 58));
+					option[1].setFillColor(Color(255, 0, 58));
+				}
+				break;
+			case 1:
+				if (IntRect(50, 120, 175, 40).contains(Mouse::getPosition(window)))
+					option[2].setFillColor(Color(255, 0, 58));
+				else if (IntRect(400, 120, 140, 40).contains(Mouse::getPosition(window)))
+					option[3].setFillColor(Color(0, 123, 211));
+				else
+				{
+					option[2].setFillColor(Color(0, 123, 211));
+					option[3].setFillColor(Color(255, 0, 58));
+				}
+				break;
+			case 2:
+				break;
+			case 3:
+				if (IntRect(50, 120, 300, 40).contains(Mouse::getPosition(window)))
+					option[20].setFillColor(Color(0, 123, 211));
+				else if (IntRect(400, 120, 130, 40).contains(Mouse::getPosition(window)))
+					option[21].setFillColor(Color(0, 123, 211));
+				else
+				{
+					option[20].setFillColor(Color(255, 0, 58));
+					option[21].setFillColor(Color(255, 0, 58));
+				}
+				break;
+			}
+		}
+
+		window.clear(Color::Black);
+
+		switch(c)
+		{
+		case 0:
+			window.draw(header[0]);
+			window.draw(option[0]);
+			window.draw(option[1]);
+			break;
+		case 1:
+			window.draw(header[1]);
+			window.draw(option[2]);
+			window.draw(option[3]);
+			break;
+		case 2:
+			window.draw(header[2]);
+			for (int i = 4; i < 20; ++i)
+				window.draw(option[i]);
+			break;
+		case 3:
+			window.draw(header[3]);
+			window.draw(option[20]);
+			window.draw(option[21]);
+			break;
+		}
+
+		window.display();
+	}
+}
+
+void clear()
+{
+	for (int i = 0; i < n; ++i)
+		delete[] field[i];
+	delete[] field;
+}
+
+void gameScreen()
+{
+	//choiceScreen(0);
+	//choiceScreen(1);
+	//choiceScreen(2);
+	//choiceScreen(3);
+
+	turn = false;
+	number = false;
+
+	field = new int*[n];
+	for (int i = 0; i < n; ++i)
+		field[i] = new int[n];
+	for (int i = 0; i < n; ++i)
+		for (int j = 0; j < n; ++j)
+			field[i][j] = -1;
+
+	Font font;
+	font.loadFromFile("SIMPLER.TTF");
+
+	Text num[n][n], cursor;
 	for (int i = 0; i < n; ++i)
 	{
 		for (int j = 0; j < n; ++j)
@@ -201,19 +391,16 @@ void gameScreen()
 			num[i][j].setFont(font);
 			num[i][j].setOutlineColor(Color(255, 255, 255));
 			num[i][j].setOutlineThickness(1);
-			if (rand() % 2)
-				num[i][j].setFillColor(Color(255, 0, 58));
-			else
-				num[i][j].setFillColor(Color(0, 123, 211));
 			num[i][j].move((0.1021 * n * n - 3.0154 * n + 36.6780) + (340 / n) * i,
 				(-0.0579 * n * n + 1.8743 * n - 4.9971) + (340 / n) * j);
-			if (rand() % 2)
-				num[i][j].setString('0');
-			else
-				num[i][j].setString('1');
 			num[i][j].setCharacterSize(340 / n - 5);
 		}
 	}
+	cursor.setFont(font);
+	cursor.setOutlineColor(Color::Yellow);
+	cursor.setOutlineThickness(1.75);
+	cursor.setString('0');
+	cursor.setCharacterSize(20);
 
 	RectangleShape grid[n][n];
 
@@ -236,12 +423,83 @@ void gameScreen()
 		{
 			if (event.type == Event::Closed)
 			{
+				clear();
 				window.close();
 				return;
+			}
+
+			if (event.type == Event::MouseButtonReleased)
+			{
+				if (event.mouseButton.button == Mouse::Left)
+				{
+					for (int i = 0; i < n; ++i)
+					{
+						for (int j = 0; j < n; ++j)
+						{
+							if (IntRect(10 + (340 / n) * i, 10 + (340 / n) * j, 340 / n, 340 / n).
+								contains(Mouse::getPosition(window)) && field[i][j] == -1)
+							{
+								if (turn)
+									num[i][j].setFillColor(Color(255, 0, 58));
+								else
+									num[i][j].setFillColor(Color(0, 123, 211));
+								if (number)
+									num[i][j].setString('1');
+								else
+									num[i][j].setString('0');
+
+								if (number)
+									field[i][j] = 1;
+								else
+									field[i][j] = 0;
+
+								if (!turn)
+									turn = true;
+								else
+									turn = false;
+							}
+						}
+					}
+				}
+				if (event.mouseButton.button == Mouse::Right)
+				{
+					if (!number)
+						number = true;
+					else
+						number = false;
+				}
+			}
+
+			for (int i = 0; i < n; ++i)
+			{
+				for (int j = 0; j < n; ++j)
+				{
+					if (IntRect(10 + (340 / n) * i, 10 + (340 / n) * j, 340 / n, 340 / n).
+						contains(Mouse::getPosition(window)) && field[i][j] == -1)
+					{
+						if (turn)
+							grid[i][j].setFillColor(Color(255, 0, 58));
+						else
+							grid[i][j].setFillColor(Color(0, 123, 211));
+					}
+					else
+						grid[i][j].setFillColor(Color(0, 0, 0));
+				}
 			}
 		}
 
 		window.clear(Color::Black);
+
+		cursor.setPosition(Vector2f(Mouse::getPosition(window)));
+		cursor.move(3, -22);
+		if (turn)
+			cursor.setFillColor(Color(255, 0, 58));
+		else
+			cursor.setFillColor(Color(0, 123, 211));
+		if (number) 
+			cursor.setString('1');
+		else 
+			cursor.setString('0');
 
 		for (int i = 0; i < n; ++i)
 		{
@@ -251,6 +509,7 @@ void gameScreen()
 				window.draw(num[i][j]);
 			}
 		}
+		window.draw(cursor);
 
 		window.display();
 	}
@@ -344,11 +603,6 @@ void rulesScreen()
 
 		window.display();
 	}
-}
-
-void scoreScreen()
-{
-
 }
 
 int main()
