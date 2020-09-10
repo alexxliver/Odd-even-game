@@ -19,7 +19,8 @@ written = false,
 faded = false,
 server = false,
 turn = false,
-number = false;
+number = false,
+ended = false;
 
 int startScreen()
 {
@@ -429,11 +430,12 @@ void clear()
 void gameScreen()
 {
 	choiceScreen(0);
-	if(server)
+	if (server) 
 		choiceScreen(1);
 	choiceScreen(2);
 
 	number = false;
+	ended = false;
 
 	field = new int*[n];
 	for (int i = 0; i < n; ++i)
@@ -445,7 +447,7 @@ void gameScreen()
 	Font font;
 	font.loadFromFile("SIMPLER.TTF");
 
-	Text cursor;
+	Text cursor, tturn[2], pause;
 	num = new Text* [n];
 	for (int i = 0; i < n; ++i)
 		num[i] = new Text[n];
@@ -461,12 +463,31 @@ void gameScreen()
 				(-0.0579 * n * n + 1.8743 * n - 4.9971) + (340 / n) * j);
 			num[i][j].setCharacterSize(340 / n - 5);
 		}
+
+		if (i == 0 || i == 1)
+		{
+			tturn[i].setFont(font);
+			tturn[i].setOutlineColor(Color(255, 255, 255));
+			tturn[i].move(400, 100 + 45 * i);
+		}
 	}
 	cursor.setFont(font);
 	cursor.setOutlineColor(Color::Yellow);
 	cursor.setOutlineThickness(1.75);
 	cursor.setString('0');
 	cursor.setCharacterSize(20);
+
+	pause.setFont(font);
+	pause.setOutlineColor(Color(255, 255, 255));
+	pause.setOutlineThickness(1);
+	tturn[0].setOutlineThickness(1);
+	pause.setString(L"• Пауза");
+	tturn[0].setString(L"Очередь:");
+	pause.setCharacterSize(40);
+	tturn[0].setCharacterSize(40);
+	tturn[1].setCharacterSize(30);
+	tturn[0].setFillColor(Color(0, 123, 211));
+	pause.move(470, 5);
 
 	grid = new RectangleShape* [n];
 	for (int i = 0; i < n; ++i)
@@ -554,16 +575,42 @@ void gameScreen()
 						grid[i][j].setFillColor(Color(0, 0, 0));
 				}
 			}
+
+			if (IntRect(470, 5, 155, 40).contains(Mouse::getPosition(window)))
+			{
+				pause.setFillColor(Color(0, 123, 211));
+
+				if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left)
+				{
+					if (choiceScreen(3))
+					{
+						turn = false;
+						return;
+					}
+				}	
+			}
+			else
+				pause.setFillColor(Color(255, 0, 58));
 		}
 
 		window.clear(Color::Black);
 
 		cursor.setPosition(Vector2f(Mouse::getPosition(window)));
 		cursor.move(3, -22);
+
 		if (turn)
+		{
 			cursor.setFillColor(Color(255, 0, 58));
+			tturn[1].setFillColor(Color(255, 0, 58));
+			tturn[1].setString(L"Чётный");
+		}
 		else
+		{
 			cursor.setFillColor(Color(0, 123, 211));
+			tturn[1].setFillColor(Color(0, 123, 211));
+			tturn[1].setString(L"Нечётный");
+		}
+			
 		if (number) 
 			cursor.setString('1');
 		else 
@@ -576,6 +623,32 @@ void gameScreen()
 				window.draw(grid[i][j]);
 				window.draw(num[i][j]);
 			}
+		}
+
+		ended = true;
+		for (int i = 0; i < n; ++i)
+		{
+			for (int j = 0; j < n; ++j)
+			{
+				if (field[i][j] == -1)
+				{
+					ended = false;
+					break;
+				}
+			}
+			if (!ended)
+				break;
+		}
+
+		if (!ended)
+		{
+			window.draw(pause);
+			window.draw(tturn[0]);
+			window.draw(tturn[1]);
+		}
+		else
+		{
+
 		}
 		window.draw(cursor);
 
@@ -649,9 +722,7 @@ void rulesScreen()
 				back.setFillColor(Color(0, 123, 211));
 
 				if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left)
-				{
 					return;
-				}
 			}
 			else
 			{
