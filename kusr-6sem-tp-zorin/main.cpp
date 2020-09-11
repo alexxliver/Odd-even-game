@@ -546,7 +546,8 @@ void gameScreen()
 	result[10].setCharacterSize(30);
 	result[11].move(0, 10);
 
-	int cnt = 0;
+	int cnt = 0, si, sj, snum;
+	bool userturn = turn;
 	while (window.isOpen())
 	{
 		Event event;
@@ -568,7 +569,8 @@ void gameScreen()
 						for (int j = 0; j < n; ++j)
 						{
 							if (IntRect(10 + (340 / n) * i, 10 + (340 / n) * j, 340 / n, 340 / n).
-								contains(Mouse::getPosition(window)) && field[i][j] == -1)
+								contains(Mouse::getPosition(window)) && field[i][j] == -1 &&
+								(!server || (server && turn == userturn)))
 							{
 								if (turn)
 									num[i][j].setFillColor(Color(255, 0, 58));
@@ -646,9 +648,42 @@ void gameScreen()
 
 		window.clear(Color::Black);
 
+		if (server && turn != userturn && !ended)
+		{
+			if (!timer)
+			{
+				si = rand() % n;
+				sj = rand() % n;
+			}
+			
+			if (field[si][sj] == -1)
+			{
+				if (!timer)
+				{
+					snum = rand() % 2;
+				}
+
+				if (!timer)
+					timer = clk.getElapsedTime().asSeconds();
+				if ((clk.getElapsedTime().asSeconds() - timer) >= 1)
+				{
+					field[si][sj] = snum;
+					if (turn)
+						num[si][sj].setFillColor(Color(255, 0, 58));
+					else
+						num[si][sj].setFillColor(Color(0, 123, 211));
+					if (snum)
+						num[si][sj].setString('1');
+					else
+						num[si][sj].setString('0');
+					turn = userturn;
+					timer = 0;
+				}
+			}
+		}
+
 		cursor.setPosition(Vector2f(Mouse::getPosition(window)));
 		cursor.move(3, -22);
-
 		if (turn)
 		{
 			cursor.setFillColor(Color(255, 0, 58));
@@ -766,7 +801,8 @@ void gameScreen()
 				counted = true;
 			}
 
-			if (!timer) timer = clk.getElapsedTime().asSeconds();
+			if (!timer) 
+				timer = clk.getElapsedTime().asSeconds();
 			
 			if ((clk.getElapsedTime().asSeconds() - timer >= 1) && cnt < 12)
 			{
