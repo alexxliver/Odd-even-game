@@ -20,7 +20,8 @@ faded = false,
 server = false,
 turn = false,
 number = false,
-ended = false;
+ended = false,
+counted = false;
 
 int startScreen()
 {
@@ -416,6 +417,11 @@ int choiceScreen(int c)
 
 void clear()
 {
+	turn = false;
+	number = false;
+	ended = false;
+	counted = false;
+
 	for (int i = 0; i < n; ++i)
 	{
 		delete[] field[i];
@@ -433,9 +439,6 @@ void gameScreen()
 	if (server) 
 		choiceScreen(1);
 	choiceScreen(2);
-
-	number = false;
-	ended = false;
 
 	field = new int*[n];
 	for (int i = 0; i < n; ++i)
@@ -505,6 +508,45 @@ void gameScreen()
 		}
 	}
 
+	int oddsum[3], evensum[3], sumbuf = 0;
+	float timer = 0;
+	Text result[12];
+	for (int i = 0; i < 12; ++i)
+	{
+		result[i].setFont(font);
+		result[i].setOutlineColor(Color(255, 255, 255));
+		result[i].move(360, 5 + 20 * i);
+		result[i].move(0, ((i + 2) / 3) * 15);
+		result[i].move(0, (i / 3) * 10);
+		if (i % 3 == 0)
+		{
+			result[i].setOutlineThickness(1);
+			result[i].setCharacterSize(30);
+			result[i].setFillColor(Color(0, 123, 211));
+		}
+		else
+		{
+			result[i].setCharacterSize(20);
+			if ((i - 1) % 3 == 0)
+				result[i].setFillColor(Color(0, 123, 211));
+			else
+				result[i].setFillColor(Color(255, 0, 58));
+		}
+
+		if (i < 3)
+		{
+			oddsum[i] = 0;
+			evensum[i] = 0;
+		}
+	}
+	result[0].setString(L"По строкам:");
+	result[3].setString(L"По столбцам:");
+	result[6].setString(L"По диагонали:");
+	result[9].setString(L"Победитель:");
+	result[10].setCharacterSize(30);
+	result[11].move(0, 10);
+
+	int cnt = 0;
 	while (window.isOpen())
 	{
 		Event event;
@@ -576,7 +618,7 @@ void gameScreen()
 				}
 			}
 
-			if (IntRect(470, 5, 155, 40).contains(Mouse::getPosition(window)))
+			if (IntRect(470, 5, 155, 40).contains(Mouse::getPosition(window)) && !ended)
 			{
 				pause.setFillColor(Color(0, 123, 211));
 
@@ -584,13 +626,22 @@ void gameScreen()
 				{
 					if (choiceScreen(3))
 					{
-						turn = false;
+						clear();
 						return;
 					}
 				}	
 			}
 			else
 				pause.setFillColor(Color(255, 0, 58));
+
+			if (cnt == 12)
+			{
+				if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left)
+				{
+					clear();
+					return;
+				}
+			}
 		}
 
 		window.clear(Color::Black);
@@ -642,15 +693,92 @@ void gameScreen()
 
 		if (!ended)
 		{
+			window.draw(cursor);
 			window.draw(pause);
 			window.draw(tturn[0]);
 			window.draw(tturn[1]);
 		}
 		else
 		{
+			if (!counted)
+			{
+				for (int i = 0; i < n; ++i)
+				{
+					for (int j = 0; j < n; ++j)
+						sumbuf += field[j][i];
+					if (sumbuf % 2 == 1) ++oddsum[0];
+					else ++evensum[0];
+					sumbuf = 0;
+				}
+				result[1].setString(L"нечётные: " + to_string(oddsum[0]));
+				result[2].setString(L"чётные: " + to_string(evensum[0]));
 
+				for (int i = 0; i < n; ++i)
+				{
+					for (int j = 0; j < n; ++j)
+						sumbuf += field[i][j];
+					if (sumbuf % 2 == 1) ++oddsum[1];
+					else ++evensum[1];
+					sumbuf = 0;
+				}
+				result[4].setString(L"нечётные: " + to_string(oddsum[1]));
+				result[5].setString(L"чётные: " + to_string(evensum[1]));
+
+				for (int i = 0; i < n; ++i)
+					sumbuf += field[i][i];
+				if (sumbuf % 2 == 1) ++oddsum[2];
+				else ++evensum[2];
+				sumbuf = 0;
+				for (int i = 0; i < n; ++i)
+					sumbuf += field[i][n - 1 - i];
+				if (sumbuf % 2 == 1) ++oddsum[2];
+				else ++evensum[2];
+				result[7].setString(L"нечётные: " + to_string(oddsum[2]));
+				result[8].setString(L"чётные: " + to_string(evensum[2]));
+
+				if (oddsum[0] + oddsum[1] + oddsum[2] >
+					evensum[0] + evensum[1] + evensum[2])
+				{
+					result[10].setFillColor(Color(0, 123, 211));
+					result[10].setString(L"Нечётный");
+					result[11].setFillColor(Color(255, 0, 58));
+					result[11].setString(to_string(oddsum[0] + oddsum[1] + oddsum[2]) +
+						"-" + to_string(evensum[0] + evensum[1] + evensum[2]));
+				}
+				else if (oddsum[0] + oddsum[1] + oddsum[2] <
+					evensum[0] + evensum[1] + evensum[2])
+				{
+					result[10].setFillColor(Color(255, 0, 58));
+					result[10].setString(L"Чётный");
+					result[11].setFillColor(Color(0, 123, 211));
+					result[11].setString(to_string(evensum[0] + evensum[1] + evensum[2]) +
+						"-" + to_string(oddsum[0] + oddsum[1] + oddsum[2]));
+				}
+				else
+				{
+					result[10].setFillColor(Color::Yellow);
+					result[10].setString(L"Ничья");
+					result[11].setFillColor(Color::Yellow);
+					result[11].setString(to_string(evensum[0] + evensum[1] + evensum[2]) +
+						"-" + to_string(oddsum[0] + oddsum[1] + oddsum[2]));
+				}
+
+				counted = true;
+			}
+
+			if (!timer) timer = clk.getElapsedTime().asSeconds();
+			
+			if ((clk.getElapsedTime().asSeconds() - timer >= 1) && cnt < 12)
+			{
+				timer = 0;
+				++cnt;
+			}
+
+			for (int i = 0; i < cnt; ++i)
+			{
+				window.draw(result[i]);
+			}
 		}
-		window.draw(cursor);
 
 		window.display();
 	}
